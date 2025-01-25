@@ -3,9 +3,7 @@ import { Modal } from "@mantine/core";
 import { useState, useEffect } from "react";
 import Plot from "react-plotly.js";
 import Dijkstra from "../utils/dijkstra";
-import React, { useState, useEffect } from "react";
 import Map, { Source, Layer, NavigationControl, Popup } from "react-map-gl";
-import { Modal } from "@mantine/core";
 import "mapbox-gl/dist/mapbox-gl.css";
 
 const MAPBOX_TOKEN = "your_mapbox_access_token"; // Replace with your Mapbox token
