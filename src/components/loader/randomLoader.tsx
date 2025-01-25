@@ -1,7 +1,7 @@
 
 export const RandomLoader = () => {
     return (
-        <div className="loader">
+        <div className="loader z-[100]">
             <div className="box box0">
                 <div></div>
             </div>

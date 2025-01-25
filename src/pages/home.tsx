@@ -54,14 +54,16 @@ function Home() {
                   and transparency in land ownership.
                 </span>
               </div>
-              <button
-                className="px-10 py-3 rounded-3xl hover:border-2 bg-[#007a00] text-white hover:text-[#007a00] hover:bg-white hover:border-[#007a00] font-semibold hover:cursor-pointer"
-                onClick={() => {
-                  window.location.href = "/dashboard";
-                }}
-              >
-                Explore now
-              </button>
+              <div className="bg-black">
+                <button
+                  className="px-10 py-3 hover:-translate-x-2 -translate-x-1 -translate-y-1 hover:-translate-y-2 transition-all hover:border-2 bg-[#007a00] text-white hover:text-[#007a00] hover:bg-white hover:border-[#007a00] font-semibold hover:cursor-pointer relative z-20"
+                  onClick={() => {
+                    window.location.href = "/dashboard";
+                  }}
+                >
+                  Explore now
+                </button>
+              </div>
               <div className="h-[10%] w-[50%]  flex justify-around"></div>
             </div>
           </div>

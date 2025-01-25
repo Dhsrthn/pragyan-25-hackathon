@@ -30,14 +30,17 @@ function Dashboard() {
   const [, setProvider] = useState<ethers.providers.Web3Provider | null>(null);
   useEffect(() => {
     console.log(ethers);
+    //@ts-ignore
     const provider = new ethers.providers.Web3Provider(window.ethereum);
 
     const loadProvider = async () => {
       if (provider) {
+        //@ts-ignore
         window.ethereum.on("chainChanged", () => {
           window.location.reload();
         });
 
+        //@ts-ignore
         window.ethereum.on("accountsChanged", () => {
           window.location.reload();
         });
@@ -77,18 +80,22 @@ function Dashboard() {
               COST: ₹100000
             </div>
             <div className="w-full h-14 flex flex-row justify-evenly p-2 text-xl mt-1">
-              <button
-                className="w-2/5 h-full text-white hover:underline transition-all hover:tracking-wider bg-[#007a00] px-10 py-1 rounded-lg hover:bg-white hover:text-black hover: border-2 hover:border-[#007a00] hover:cursor-pointer"
-                onClick={handleConfirmation}
-              >
-                Confirm
-              </button>
-              <button
-                className="w-2/5 h-full bg-black rounded-lg text-white hover:underline transition-all hover:tracking-wider px-10 py-1 hover:bg-white hover:border hover:border-black hover:text-black hover:cursor-pointer"
-                onClick={close}
-              >
-                Close
-              </button>
+              <div className="w-2/5 h-full bg-black">
+                <button
+                  className="w-full h-full text-white hover:underline transition-all hover:tracking-wider bg-[#007a00] px-10 py-1  hover:bg-white hover:text-black hover:border-2 hover:border-[#007a00] hover:cursor-pointer -translate-x-1 -translate-y-1"
+                  onClick={handleConfirmation}
+                >
+                  Confirm
+                </button>
+              </div>
+              <div className="w-2/5 h-full bg-black">
+                <button
+                  className="w-full h-full bg-red-900 text-white hover:underline transition-all hover:tracking-wider px-10 py-1 hover:bg-white hover:border hover:border-black hover:text-black hover:cursor-pointer -translate-x-1 -translate-y-1"
+                  onClick={close}
+                >
+                  Close
+                </button>
+              </div>
             </div>
           </div>
         </Modal.Body>
@@ -107,15 +114,26 @@ function Dashboard() {
         <div className="w-full h-[80%] flex flex-wrap justify-center gap-8 items-start p-2">
           {array.map((item) => {
             return (
-              <div className="w-60 h-60 rounded-xl border-gray-100 border flex flex-col justify-around items-center transition-all hover:translate-x-2 hover:translate-y-2" style={{ boxShadow: '5px 5px 15px -7px rgba(0,0,0,0.7)' }} >
-                {/* Property Name */}
-                <span className="font-bold text-2xl h-12 py-2">Property {item}</span>
-                <img src={`/assets/images/buildings/${imgSrcs[giveRandomNumber(4)]}`} alt="" className='h-32 object-contain rounded-lg' />
-                {/* Buttons */}
-                <div className='h-12 py-2'>
-                  <button color="#007a00" className='bg-[#007a00] px-10 py-1 rounded-lg text-white hover:bg-white hover:text-black hover: border-2 hover:border-[#007a00] hover:cursor-pointer' onClick={open}>Buy</button>
+              <>
+                <div className="w-56 h-60 bg-black">
+                  <div className={`w-full h-60 bg-white flex flex-col justify-around items-center ${!loader && "-translate-x-1 -translate-y-1"}  border `} >
+                    {/* Property Name */}
+                    <span className="font-bold text-2xl h-12 py-2">Property {item}</span>
+                    <img src={`/assets/images/buildings/${imgSrcs[giveRandomNumber(4)]}`} alt="" className='h-32 object-contain' />
+                    {/* Buttons */}
+                    <div className='h-12 py-2'>
+                      <div className="bg-black">
+                        <button
+                          className={`px-10 py-1 hover:-translate-x-2 ${!loader && "-translate-x-1 -translate-y-1"}  hover:-translate-y-2 transition-all hover:border-2 bg-[#007a00] text-white hover:text-[#007a00] hover:bg-white hover:border-[#007a00] font-semibold hover:cursor-pointer`}
+                          onClick={open}
+                        >
+                          Buy
+                        </button>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-              </div>
+              </>
             )
           })}
         </div>
