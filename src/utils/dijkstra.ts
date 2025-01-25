@@ -26,7 +26,7 @@ export interface PathResult {
 }
 
 export async function loadCountyGraph(): Promise<Graph> {
-    const response = await fetch('/county-graph.json');
+    const response = await fetch('/county_graph.json');
     if (!response.ok) {
         throw new Error('Failed to load county graph');
     }
