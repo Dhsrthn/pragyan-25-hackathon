@@ -1,7 +1,7 @@
 import { useDisclosure } from '@mantine/hooks';
 import { Modal } from '@mantine/core';
 
-const array = [1, 2, 3, 4]
+const array = [1, 2, 3, 4, 5, 6, 7, 8]
 
 function Dashboard() {
     const [opened, { open, close }] = useDisclosure(false);
@@ -18,16 +18,15 @@ function Dashboard() {
                 </div> */}
 
                 {/* List of properties */}
-                <div className="w-full h-[80%] flex flex-col justify-start gap-4 items-center">
+                <div className="w-full h-[80%] flex flex-wrap justify-center gap-8 items-start p-2">
                     {array.map((item) => {
                         return (
-                            <div className="w-full border border-gray-300 flex justify-between rounded-lg items-center px-5 py-1">
+                            <div className="w-60 h-60 rounded-xl shadow-2xl border-gray-100 border flex flex-col justify-between items-center p-5 transition-all hover:translate-x-2 hover:translate-y-2 ">
                                 {/* Property Name */}
                                 <span className="font-bold text-2xl">Property {item}</span>
                                 {/* Buttons */}
                                 <div>
-
-                                    <button color="#007a00" className='bg-[#007a00] px-4 py-1 rounded-lg text-white hover:bg-white hover:text-black hover: border-2 hover:border-[#007a00] hover:cursor-pointer ' onClick={open}>Buy</button>
+                                    <button color="#007a00" className='bg-[#007a00] px-10 py-1 rounded-lg text-white hover:bg-white hover:text-black hover: border-2 hover:border-[#007a00] hover:cursor-pointer ' onClick={open}>Buy</button>
                                 </div>
                             </div>
                         )

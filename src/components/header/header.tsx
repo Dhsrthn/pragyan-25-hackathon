@@ -27,9 +27,9 @@ function Header() {
                 {/* Left */}
                 <div className="w-[50%] h-full  flex justify-end">
                     <div className="h-full w-[82%] flex justify-around items-center font-semibold text-base">
-                        <a href="/">
-                            <span className="font-bold text-[2.5rem] font-integralcfBold tracking-[-0.2em] text-[#007a00]">
-                                DATA FORCE
+                        <a href="/" className="flex items-center h-full">
+                            <span className="font-bold text-[2.5rem] font-integralcfBold tracking-[-0.15em] text-[#007a00]">
+                                ACRE WISE
                             </span>
                         </a>
                         <a href="/map">
