@@ -21,7 +21,7 @@ function Dashboard() {
                 <div className="w-full h-[80%] flex flex-wrap justify-center gap-8 items-start p-2">
                     {array.map((item) => {
                         return (
-                            <div className="w-60 h-60 rounded-xl shadow-2xl border-gray-100 border flex flex-col justify-between items-center p-5 transition-all hover:translate-x-2 hover:translate-y-2 ">
+                            <div className="w-60 h-60 rounded-xl border-gray-100 border flex flex-col justify-between items-center p-5 transition-all hover:translate-x-2 hover:translate-y-2" style={{ boxShadow: '5px 5px 15px -7px rgba(0,0,0,0.7)' }} >
                                 {/* Property Name */}
                                 <span className="font-bold text-2xl">Property {item}</span>
                                 {/* Buttons */}
@@ -33,7 +33,7 @@ function Dashboard() {
                     })}
                 </div>
             </div>
-        </div>
+        </div >
     </>)
 }
 
