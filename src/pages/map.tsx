@@ -3,6 +3,7 @@ import { useDisclosure } from '@mantine/hooks';
 import { Modal } from '@mantine/core';
 import { useState, useEffect } from 'react';
 import Plot from 'react-plotly.js';
+import Dijkstra from '../utils/dijkstra';
 
 function Map() {
     const [mapData, setMapData] = useState(null);
