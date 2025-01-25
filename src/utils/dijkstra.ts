@@ -16,6 +16,15 @@ export interface Graph {
     edges: GraphEdge[];
 }
 
+export interface PathResult {
+    path: {
+        id: string;
+        centroid_x: number;
+        centroid_y: number;
+    }[];
+    distance: number;
+}
+
 export async function loadCountyGraph(): Promise<Graph> {
     const response = await fetch('/county-graph.json');
     if (!response.ok) {
@@ -29,10 +38,9 @@ export function findShortestPath(
     start: string, 
     end: string, 
     nodesToAvoid: string[] = []
-): { path: string[], distance: number } {
+): PathResult {
     const adjacencyList = new Map<string, string[]>();
     
-    // Build adjacency list
     graph.nodes.forEach(node => {
         adjacencyList.set(node.id, []);
     });
@@ -46,7 +54,6 @@ export function findShortestPath(
     const previous = new Map<string, string | null>();
     const unvisited = new Set<string>();
 
-    // Initialize
     graph.nodes.forEach(node => {
         if (nodesToAvoid.includes(node.id)) return;
         distances.set(node.id, Infinity);
@@ -81,7 +88,14 @@ export function findShortestPath(
             }
 
             return {
-                path,
+                path: path.map(id => {
+                    const node = graph.nodes.find(n => n.id === id)!;
+                    return {
+                        id,
+                        centroid_x: node.centroid_x,
+                        centroid_y: node.centroid_y
+                    };
+                }),
                 distance: distances.get(end)!
             };
         }
