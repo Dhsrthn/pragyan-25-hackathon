@@ -47,7 +47,7 @@ function Header() {
                 <div className="w-[50%] h-full flex justify-start">
                     <div className="h-full w-[82%] flex justify-around items-center text-sm font-dmsans font-semibold">
                         <div className="w-[40%] h-[50%] bg-black">
-                            <div className="w-full border bg-white -translate-x-1 -translate-y-1 border-gray-300 h-full flex justify-around">
+                            <div className="w-full border bg-white -translate-x-1 -translate-y-1 h-full flex justify-around">
                                 <input
                                     type="text"
                                     className="w-[80%] bg-transparent pl-2 outline-none hover:border-none focus:border-none active:border-none active:outline-none focus:outline-none"

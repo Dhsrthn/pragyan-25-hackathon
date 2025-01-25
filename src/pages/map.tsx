@@ -4,6 +4,7 @@ import { Modal } from '@mantine/core';
 import { useState, useEffect } from 'react';
 import Plot from 'react-plotly.js';
 import { loadCountyGraph, findShortestPath } from '../utils/dijkstra'; // Importing dijkstra utilities
+import PlotInformation from '../components/information/information';
 
 
 enum Mode {
@@ -68,6 +69,18 @@ function Map() {
         const selectedBlock = populationData.find(row => row.GEO_ID === geoId);
         if (!selectedBlock) return;
 
+        if (mode == Mode.ROAD) {
+            handleConstructRoad(geoId);
+        } else if (mode == Mode.REMOVE) {
+
+        } else if (mode == Mode.INFORMATION) {
+            open();
+        }
+    };
+
+    const handleConstructRoad = async (geoId) => {
+        const selectedBlock = populationData.find(row => row.GEO_ID === geoId);
+
         setSelectedNodes(prevState => {
             if (!prevState.start) {
                 return { ...prevState, start: selectedBlock };
@@ -83,7 +96,7 @@ function Map() {
                 return { start: selectedBlock, destination: null };
             }
         });
-    };
+    }
 
     const calculateShortestPath = async (startId, destinationId) => {
         try {
@@ -118,18 +131,27 @@ function Map() {
 
     return (
         <div className="h-screen w-screen overflow-hidden">
-            <Modal opened={opened} onClose={close}>
-                Hello, this is a centered modal
-            </Modal>
-            <div className='h-[10%]'>
-
-            </div>
+            <Modal.Root opened={opened} onClose={close}>
+                <Modal.Overlay backgroundOpacity={0.55} blur={3} />
+                <Modal.Content>
+                    <Modal.Header>
+                        <Modal.Title className="text-4xl font-bold text-redd">
+                            Plot Information
+                        </Modal.Title>
+                        <Modal.CloseButton />
+                    </Modal.Header>
+                    <Modal.Body>
+                        <PlotInformation />
+                    </Modal.Body>
+                </Modal.Content>
+            </Modal.Root>
+            <div className='h-[10%]'></div>
             {/* Selection Display */}
             <div className="h-[90%] flex overflow-y-auto overflow-x-hidden">
-                <div className="w-[25%] h-full border flex flex-col gap-4  p-4">
+                <div className="w-[20%] h-full flex flex-col gap-4  p-4">
                     <div className='bg-black h-[40%]'>
-                        <div className='p-2 bg-white -translate-x-1 -translate-y-1 flex flex-col gap-4 items-center h-full border'>
-                            <span className='text-3xl'>Choose Select Mode</span>
+                        <div className='p-2 bg-white -translate-x-1 -translate-y-1 flex flex-col gap-4 h-full border'>
+                            <h2 className="text-xl font-bold px-2">Choose Selection Mode</h2>
                             <div className='h-[80%] flex flex-col justify-around items-center'>
 
                                 <div className='bg-black h-fit w-fit'>
@@ -144,36 +166,38 @@ function Map() {
                             </div>
                         </div>
                     </div>
-                    <div className="p-2 bg-gray-100 border-b border-gray-300 w-full h-1/2">
-                        <h2 className="text-xl font-bold px-2">Selected Nodes</h2>
-                        <div className="flex flex-col justify-between mt-2">
-                            <div className="w-1/2 p-2 border-b border-gray-300">
-                                <h3 className="font-medium">Start Node:</h3>
-                                {selectedNodes.start ? (
-                                    <div className="text-sm">
-                                        <p><b>GEO_ID:</b> {selectedNodes.start.GEO_ID}</p>
-                                        <p><b>State:</b> {selectedNodes.start.STATE}</p>
-                                        <p><b>County:</b> {selectedNodes.start.COUNTY}</p>
-                                        <p><b>Name:</b> {selectedNodes.start.NAME}</p>
-                                        <p><b>Census Area:</b> {selectedNodes.start.CENSUSAREA} sq mi</p>
-                                    </div>
-                                ) : (
-                                    <p className="text-gray-500">Click a block to select.</p>
-                                )}
-                            </div>
-                            <div className="w-1/2 p-2">
-                                <h3 className="font-medium">Destination Node:</h3>
-                                {selectedNodes.destination ? (
-                                    <div className="text-sm">
-                                        <p><b>GEO_ID:</b> {selectedNodes.destination.GEO_ID}</p>
-                                        <p><b>State:</b> {selectedNodes.destination.STATE}</p>
-                                        <p><b>County:</b> {selectedNodes.destination.COUNTY}</p>
-                                        <p><b>Name:</b> {selectedNodes.destination.NAME}</p>
-                                        <p><b>Census Area:</b> {selectedNodes.destination.CENSUSAREA} sq mi</p>
-                                    </div>
-                                ) : (
-                                    <p className="text-gray-500">Click a block to select.</p>
-                                )}
+                    <div className='bg-black h-1/2 w-full'>
+                        <div className="p-2 bg-gray-100 -translate-x-1 border -translate-y-1 w-full h-full ">
+                            <h2 className="text-xl font-bold px-2">Selected Nodes</h2>
+                            <div className="flex flex-col justify-between mt-2">
+                                <div className="w-full p-2 border-b border-gray-300">
+                                    <h3 className="font-medium">Start Node:</h3>
+                                    {selectedNodes.start ? (
+                                        <div className="text-sm">
+                                            <p><b>GEO_ID:</b> {selectedNodes.start.GEO_ID}</p>
+                                            <p><b>State:</b> {selectedNodes.start.STATE}</p>
+                                            <p><b>County:</b> {selectedNodes.start.COUNTY}</p>
+                                            <p><b>Name:</b> {selectedNodes.start.NAME}</p>
+                                            <p><b>Census Area:</b> {selectedNodes.start.CENSUSAREA} sq mi</p>
+                                        </div>
+                                    ) : (
+                                        <p className="text-gray-500">Click a block to select.</p>
+                                    )}
+                                </div>
+                                <div className="w-full p-2">
+                                    <h3 className="font-medium">Destination Node:</h3>
+                                    {selectedNodes.destination ? (
+                                        <div className="text-sm">
+                                            <p><b>GEO_ID:</b> {selectedNodes.destination.GEO_ID}</p>
+                                            <p><b>State:</b> {selectedNodes.destination.STATE}</p>
+                                            <p><b>County:</b> {selectedNodes.destination.COUNTY}</p>
+                                            <p><b>Name:</b> {selectedNodes.destination.NAME}</p>
+                                            <p><b>Census Area:</b> {selectedNodes.destination.CENSUSAREA} sq mi</p>
+                                        </div>
+                                    ) : (
+                                        <p className="text-gray-500">Click a block to select.</p>
+                                    )}
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -229,7 +253,7 @@ function Map() {
                         const geoId = event.points[0]?.location;
                         if (geoId) handleBlockClick(geoId);
                     }}
-                    className='w-[75%] h-full'
+                    className='w-[80%] h-full'
                 />
 
             </div>
