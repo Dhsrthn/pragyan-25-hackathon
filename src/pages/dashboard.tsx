@@ -1,5 +1,5 @@
 import { useDisclosure } from '@mantine/hooks';
-import { Modal, Button } from '@mantine/core';
+import { Modal } from '@mantine/core';
 
 const array = [1, 2, 3, 4]
 
