@@ -1,106 +1,123 @@
 //@ts-no-check
-import { useDisclosure } from '@mantine/hooks';
-import { Modal } from '@mantine/core';
-import { useState, useEffect } from 'react';
-import Plot from 'react-plotly.js';
-import Dijkstra from '../utils/dijkstra';
+import { Modal } from "@mantine/core";
+import { useState, useEffect } from "react";
+import Plot from "react-plotly.js";
+import Dijkstra from "../utils/dijkstra";
+import React, { useState, useEffect } from "react";
+import Map, { Source, Layer, NavigationControl, Popup } from "react-map-gl";
+import { Modal } from "@mantine/core";
+import "mapbox-gl/dist/mapbox-gl.css";
 
-function Map() {
-    const [mapData, setMapData] = useState(null);
-    const [populationData, setPopulationData] = useState(null);
-    const [opened, { open, close }] = useDisclosure(false);
+const MAPBOX_TOKEN = "your_mapbox_access_token"; // Replace with your Mapbox token
 
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                // Fetch GeoJSON data
-                const geoResponse = await fetch('input.json');
-                const geoJsonData = await geoResponse.json();
+function CountyMap() {
+  const [mapData, setMapData] = useState(null);
+  const [populationData, setPopulationData] = useState(null);
+  const [selectedCounty, setSelectedCounty] = useState(null);
+  const [modalOpened, setModalOpened] = useState(false);
 
-                // Fetch CSV data
-                const csvResponse = await fetch('output.csv');
-                const csvText = await csvResponse.text();
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const geoResponse = await fetch("input.json");
+        const geoJsonData = await geoResponse.json();
 
-                // Parse CSV
-                const rows = csvText.split('\n').slice(1).map(row => {
-                    const [GEO_ID, STATE, COUNTY, NAME, LSAD, CENSUSAREA] = row.split(',');
-                    return {
-                        GEO_ID,
-                        STATE,
-                        COUNTY,
-                        NAME,
-                        LSAD,
-                        CENSUSAREA: parseFloat(CENSUSAREA)
-                    };
-                }).filter(row => row.GEO_ID);
+        const csvResponse = await fetch("output.csv");
+        const csvText = await csvResponse.text();
 
-                setMapData(geoJsonData);
-                //@ts-expect-error
-                setPopulationData(rows);
-            } catch (error) {
-                console.error('Error fetching data:', error);
-            }
-        };
+        const rows = csvText
+          .split("\n")
+          .slice(1)
+          .map((row) => {
+            const [GEO_ID, STATE, COUNTY, NAME, LSAD, CENSUSAREA] =
+              row.split(",");
+            return {
+              GEO_ID,
+              STATE,
+              COUNTY,
+              NAME,
+              LSAD,
+              CENSUSAREA: parseFloat(CENSUSAREA),
+            };
+          })
+          .filter((row) => row.GEO_ID);
 
-        fetchData();
-    }, []);
+        setMapData(geoJsonData);
+        setPopulationData(rows);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
 
-    if (!mapData || !populationData) return <div>Loading...</div>;
+    fetchData();
+  }, []);
 
-    return (
-        <div className="h-screen w-screen overflow-hidden">
-            <Modal opened={opened} onClose={close}>
-                Hello, this is centered modal
-            </Modal>
-            <div className="h-[10%]"></div>
-            <div className='h-[90%] overflow-y-auto overflow-x-hidden '>
-                <Plot
-                    data={[{
-                        type: 'choroplethmapbox',
-                        //@ts-expect-error
-                        geojson: mapData,
-                        //@ts-expect-error
-                        locations: populationData.map(row => row.GEO_ID),
-                        //@ts-expect-error
-                        z: populationData.map(row => row.CENSUSAREA),
-                        colorscale: 'Viridis',
-                        marker: {
-                            opacity: 0.7,
-                            line: { width: 0 }
-                        },
-                        //@ts-expect-error
-                        text: populationData.map(row =>
-                            `GEO_ID: ${row.GEO_ID}<br>` +
-                            `State: ${row.STATE}<br>` +
-                            `County: ${row.COUNTY}<br>` +
-                            `Name: ${row.NAME}<br>` +
-                            `LSAD: ${row.LSAD}<br>` +
-                            `Census Area: ${row.CENSUSAREA} sq mi`
-                        ),
-                        hoverinfo: 'text',
-                        hovertemplate:
-                            '<b>%{text}</b><extra></extra>', // Ensures only custom text is shown
-                        featureidkey: 'properties.GEO_ID',
-                        // Add hover color change
-                        hoverlabel: {
-                            bgcolor: 'green',
-                            font: { color: 'white' }
-                        }
-                    }]}
-                    layout={{
-                        mapbox: {
-                            style: 'carto-positron',
-                            center: { lat: 37.0902, lon: -95.7129 },
-                            zoom: 3
-                        },
-                        width: window.innerWidth,
-                        height: window.innerHeight,
-                        title: 'US Counties Census Area'
-                    }}
-                />
-            </div>
-        </div>
-    );
-};
+  const countyLayerStyle = {
+    id: "county-layer",
+    type: "fill",
+    source: "counties",
+    paint: {
+      "fill-color": [
+        "case",
+        ["==", ["get", "GEO_ID"], selectedCounty],
+        "rgba(255, 0, 0, 0.5)", // Bright red for selected county
+        "rgba(51, 51, 51, 0.2)", // Gray for other counties
+      ],
+      "fill-opacity": 0.7,
+      "fill-outline-color": "white",
+    },
+  };
 
-export default Map;
+  const handleClick = (event) => {
+    const feature = event.features?.[0];
+    if (feature) {
+      const countyGeoId = feature.properties.GEO_ID;
+      setSelectedCounty(countyGeoId);
+      setModalOpened(true);
+    }
+  };
+
+  const selectedCountyDetails = populationData?.find(
+    (row) => row.GEO_ID === selectedCounty
+  );
+
+  return (
+    <div className="h-screen w-screen">
+      <Modal
+        opened={modalOpened}
+        onClose={() => setModalOpened(false)}
+        title="County Details"
+      >
+        {selectedCountyDetails && (
+          <div>
+            <p>Name: {selectedCountyDetails.NAME}</p>
+            <p>State: {selectedCountyDetails.STATE}</p>
+            <p>Census Area: {selectedCountyDetails.CENSUSAREA} sq mi</p>
+          </div>
+        )}
+      </Modal>
+
+      <Map
+        initialViewState={{
+          latitude: 37.0902,
+          longitude: -95.7129,
+          zoom: 3,
+        }}
+        style={{ width: "100%", height: "100%" }}
+        mapStyle="mapbox://styles/mapbox/light-v11"
+        mapboxAccessToken={MAPBOX_TOKEN}
+        interactiveLayerIds={["county-layer"]}
+        onClick={handleClick}
+      >
+        {mapData && (
+          <Source type="geojson" data={mapData}>
+            <Layer {...countyLayerStyle} />
+          </Source>
+        )}
+        <NavigationControl position="top-right" />
+      </Map>
+    </div>
+  );
+}
+
+export default CountyMap;
