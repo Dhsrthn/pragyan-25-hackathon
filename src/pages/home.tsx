@@ -49,7 +49,7 @@ function Home() {
                   Everything Accounted For. <br />
                 </span>
                 <span className="text-2xl font-dmsans text-left text-[#565656] tracking-wide">
-                  Empowring trust,
+                  Empowering trust,
                   <br />
                   and transparency in land ownership.
                 </span>
