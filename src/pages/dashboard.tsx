@@ -21,13 +21,13 @@ function Dashboard() {
                 <div className="w-full h-[80%] flex flex-col justify-start gap-4 items-center">
                     {array.map((item) => {
                         return (
-                            <div className="w-full border flex justify-between rounded-lg items-center px-5 py-1">
+                            <div className="w-full border border-gray-300 flex justify-between rounded-lg items-center px-5 py-1">
                                 {/* Property Name */}
                                 <span className="font-bold text-2xl">Property {item}</span>
                                 {/* Buttons */}
                                 <div>
 
-                                    <Button color="#007a00" onClick={open}>Buy</Button>
+                                    <button color="#007a00" className='bg-[#007a00] px-4 py-1 rounded-lg text-white hover:bg-white hover:text-black hover: border-2 hover:border-[#007a00] hover:cursor-pointer ' onClick={open}>Buy</button>
                                 </div>
                             </div>
                         )
