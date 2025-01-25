@@ -28,7 +28,7 @@ function Header() {
                 <div className="w-[50%] h-full  flex justify-end">
                     <div className="h-full w-[82%] flex justify-around items-center font-semibold text-base">
                         <a href="/">
-                            <span className="font-bold text-[2.5rem] font-integralcfBold tracking-[-0.2em] text-[#3D00B7]">
+                            <span className="font-bold text-[2.5rem] font-integralcfBold tracking-[-0.2em] text-[#007a00]">
                                 DATA FORCE
                             </span>
                         </a>
@@ -38,7 +38,9 @@ function Header() {
                         <a href="/dashboard">
                             <span className=" font-dmsans">Dashboard</span>
                         </a>
-                        <span className=" font-dmsans">About us</span>
+                        <a href="https://github.com/Dhsrthn/pragyan-25-hackathon" target="_blank">
+                            <span className=" font-dmsans">About us</span>
+                        </a>
                     </div>
                 </div>
                 {/* Right */}
@@ -56,7 +58,7 @@ function Header() {
                         </div>
 
                         <div className="w-[20%] h-[50%] rounded-3xl">
-                            <button className="h-full w-full rounded-3xl border-2 border-[#3D00B7] text-[#3D00B7] hover:bg-[#3D00B7] hover:text-white">
+                            <button className="h-full w-full rounded-3xl border-2 border-[#007a00] text-[#007a00] hover:bg-[#007a00] hover:text-white">
                                 Connect Wallet
                             </button>
                         </div>
