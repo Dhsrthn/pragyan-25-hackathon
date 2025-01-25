@@ -1,9 +1,16 @@
-//@ts-no-check
+//@ts-nocheck
 import { useDisclosure } from '@mantine/hooks';
 import { Modal } from '@mantine/core';
 import { useState, useEffect } from 'react';
 import Plot from 'react-plotly.js';
 import { loadCountyGraph, findShortestPath } from '../utils/dijkstra'; // Importing dijkstra utilities
+
+
+enum Mode {
+    INFORMATION,
+    ROAD,
+    REMOVE
+}
 
 function Map() {
     const [mapData, setMapData] = useState(null);
@@ -11,6 +18,7 @@ function Map() {
     const [selectedNodes, setSelectedNodes] = useState({ start: null, destination: null });
     const [pathData, setPathData] = useState<{ id: string; lon: number; lat: number; }[]>([]);
     const [opened, { open, close }] = useDisclosure(false);
+    const [mode, setMode] = useState(Mode.INFORMATION);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -50,6 +58,12 @@ function Map() {
         fetchData();
     }, []);
 
+    const handleModeChange = (mode: Mode) => {
+        setSelectedNodes({ start: null, destination: null });
+        setPathData([]);
+        setMode(mode);
+    }
+
     const handleBlockClick = async (geoId) => {
         const selectedBlock = populationData.find(row => row.GEO_ID === geoId);
         if (!selectedBlock) return;
@@ -75,9 +89,9 @@ function Map() {
         try {
             const graph = await loadCountyGraph();
             const result = findShortestPath(graph, startId, destinationId);
-    
+
             console.log('Shortest path result:', result);
-    
+
             if (result.path.length > 0) {
                 const pathWithCoordinates = result.path.map((node) => {
                     const { centroid_x: lon, centroid_y: lat, id } = node;
@@ -87,7 +101,7 @@ function Map() {
                         lat
                     };
                 });
-                
+
                 console.log('Path with coordinates:', pathWithCoordinates);
                 setPathData(pathWithCoordinates);
             } else {
@@ -97,7 +111,7 @@ function Map() {
             console.error('Error calculating shortest path:', error);
         }
     };
-    
+
 
 
     if (!mapData || !populationData) return <div>Loading...</div>;
@@ -107,43 +121,64 @@ function Map() {
             <Modal opened={opened} onClose={close}>
                 Hello, this is a centered modal
             </Modal>
+            <div className='h-[10%]'>
 
-            {/* Selection Display */}
-            <div className="p-4 bg-gray-100 border-b border-gray-300">
-                <h2 className="text-lg font-bold">Selected Nodes</h2>
-                <div className="flex justify-between mt-2">
-                    <div className="w-1/2 p-2 border-r border-gray-300">
-                        <h3 className="font-medium">Start Node:</h3>
-                        {selectedNodes.start ? (
-                            <div className="text-sm">
-                                <p><b>GEO_ID:</b> {selectedNodes.start.GEO_ID}</p>
-                                <p><b>State:</b> {selectedNodes.start.STATE}</p>
-                                <p><b>County:</b> {selectedNodes.start.COUNTY}</p>
-                                <p><b>Name:</b> {selectedNodes.start.NAME}</p>
-                                <p><b>Census Area:</b> {selectedNodes.start.CENSUSAREA} sq mi</p>
-                            </div>
-                        ) : (
-                            <p className="text-gray-500">Click a block to select.</p>
-                        )}
-                    </div>
-                    <div className="w-1/2 p-2">
-                        <h3 className="font-medium">Destination Node:</h3>
-                        {selectedNodes.destination ? (
-                            <div className="text-sm">
-                                <p><b>GEO_ID:</b> {selectedNodes.destination.GEO_ID}</p>
-                                <p><b>State:</b> {selectedNodes.destination.STATE}</p>
-                                <p><b>County:</b> {selectedNodes.destination.COUNTY}</p>
-                                <p><b>Name:</b> {selectedNodes.destination.NAME}</p>
-                                <p><b>Census Area:</b> {selectedNodes.destination.CENSUSAREA} sq mi</p>
-                            </div>
-                        ) : (
-                            <p className="text-gray-500">Click a block to select.</p>
-                        )}
-                    </div>
-                </div>
             </div>
+            {/* Selection Display */}
+            <div className="h-[90%] flex overflow-y-auto overflow-x-hidden">
+                <div className="w-[25%] h-full border flex flex-col gap-4  p-4">
+                    <div className='bg-black h-[40%]'>
+                        <div className='p-2 bg-white -translate-x-1 -translate-y-1 flex flex-col gap-4 items-center h-full border'>
+                            <span className='text-3xl'>Choose Select Mode</span>
+                            <div className='h-[80%] flex flex-col justify-around items-center'>
 
-            <div className="h-[90%] overflow-y-auto overflow-x-hidden">
+                                <div className='bg-black h-fit w-fit'>
+                                    <button className={`px-5 py-2 ${mode == Mode.INFORMATION ? "bg-[#007a00] text-white -translate-x-2 -translate-y-2" : "-translate-x-1 -translate-y-1 border-2 border-[#007a00] bg-white text-[#007a00] transition-all hover:-translate-x-2 hover:-translate-y-2 hover:text-white hover:bg-[#007a00]"} hover:cursor-pointer`} onClick={() => { handleModeChange(Mode.INFORMATION) }}>View Information</button>
+                                </div>
+                                <div className='bg-black h-fit w-fit'>
+                                    <button className={`px-5 py-2 ${mode == Mode.ROAD ? "bg-[#007a00] text-white -translate-x-2 -translate-y-2" : "-translate-x-1 -translate-y-1 border-2 border-[#007a00] bg-white text-[#007a00] transition-all hover:-translate-x-2 hover:-translate-y-2 hover:text-white hover:bg-[#007a00]"} hover:cursor-pointer`} onClick={() => { handleModeChange(Mode.ROAD) }}>Construct Paths</button>
+                                </div>
+                                <div className='bg-black h-fit w-fit'>
+                                    <button className={`px-5 py-2 ${mode == Mode.REMOVE ? "bg-[#007a00] text-white -translate-x-2 -translate-y-2" : "-translate-x-1 -translate-y-1 border-2 border-[#007a00] bg-white text-[#007a00] transition-all hover:-translate-x-2 hover:-translate-y-2 hover:text-white hover:bg-[#007a00]"} hover:cursor-pointer`} onClick={() => { handleModeChange(Mode.REMOVE) }}>Mark Inaccessible</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="p-2 bg-gray-100 border-b border-gray-300 w-full h-1/2">
+                        <h2 className="text-xl font-bold px-2">Selected Nodes</h2>
+                        <div className="flex flex-col justify-between mt-2">
+                            <div className="w-1/2 p-2 border-b border-gray-300">
+                                <h3 className="font-medium">Start Node:</h3>
+                                {selectedNodes.start ? (
+                                    <div className="text-sm">
+                                        <p><b>GEO_ID:</b> {selectedNodes.start.GEO_ID}</p>
+                                        <p><b>State:</b> {selectedNodes.start.STATE}</p>
+                                        <p><b>County:</b> {selectedNodes.start.COUNTY}</p>
+                                        <p><b>Name:</b> {selectedNodes.start.NAME}</p>
+                                        <p><b>Census Area:</b> {selectedNodes.start.CENSUSAREA} sq mi</p>
+                                    </div>
+                                ) : (
+                                    <p className="text-gray-500">Click a block to select.</p>
+                                )}
+                            </div>
+                            <div className="w-1/2 p-2">
+                                <h3 className="font-medium">Destination Node:</h3>
+                                {selectedNodes.destination ? (
+                                    <div className="text-sm">
+                                        <p><b>GEO_ID:</b> {selectedNodes.destination.GEO_ID}</p>
+                                        <p><b>State:</b> {selectedNodes.destination.STATE}</p>
+                                        <p><b>County:</b> {selectedNodes.destination.COUNTY}</p>
+                                        <p><b>Name:</b> {selectedNodes.destination.NAME}</p>
+                                        <p><b>Census Area:</b> {selectedNodes.destination.CENSUSAREA} sq mi</p>
+                                    </div>
+                                ) : (
+                                    <p className="text-gray-500">Click a block to select.</p>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
                 <Plot
                     data={[
                         {
@@ -188,14 +223,13 @@ function Map() {
                             center: { lat: 37.0902, lon: -95.7129 },
                             zoom: 3,
                         },
-                        width: window.innerWidth,
-                        height: window.innerHeight,
                         title: 'US Counties Census Area with Shortest Path',
                     }}
                     onClick={(event) => {
                         const geoId = event.points[0]?.location;
                         if (geoId) handleBlockClick(geoId);
                     }}
+                    className='w-[75%] h-full'
                 />
 
             </div>
