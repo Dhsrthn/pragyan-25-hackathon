@@ -124,6 +124,7 @@ function Dashboard() {
       toast.error("Blockchain contract not initialized");
       return;
     }
+    close();
 
     try {
       setLoader(true);
@@ -138,7 +139,6 @@ function Dashboard() {
       // await tx.wait();
 
       toast.success("Property added successfully");
-      close();
     } catch (error) {
       console.error("Error adding property:", error);
       toast.error("Failed to add property");
