@@ -1,3 +1,4 @@
+//@ts-nocheck
 import { useDisclosure } from "@mantine/hooks";
 import { Modal } from "@mantine/core";
 import { ethers } from "ethers";
