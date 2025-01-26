@@ -6,4 +6,10 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "3000:80"
+        - "3000:80"
+  backend:
+    build: 
+      context: Email-Service
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3001"
