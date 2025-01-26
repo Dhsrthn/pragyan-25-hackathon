@@ -1,5 +1,77 @@
 export const abi = [
   {
+    inputs: [
+      {
+        internalType: "address",
+        name: "_official",
+        type: "address",
+      },
+    ],
+    name: "addAuthorizedOfficial",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "string",
+        name: "_propertyName",
+        type: "string",
+      },
+      {
+        internalType: "string",
+        name: "_location",
+        type: "string",
+      },
+      {
+        internalType: "uint256",
+        name: "_area",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "_price",
+        type: "uint256",
+      },
+      {
+        internalType: "string",
+        name: "_imageURL",
+        type: "string",
+      },
+    ],
+    name: "addProperty",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "_propertyId",
+        type: "uint256",
+      },
+    ],
+    name: "approveROW",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "_official",
+        type: "address",
+      },
+    ],
+    name: "removeAuthorizedOfficial",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
     inputs: [],
     stateMutability: "nonpayable",
     type: "constructor",
@@ -71,91 +143,16 @@ export const abi = [
     inputs: [
       {
         internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
-    ],
-    name: "ROWApprovals",
-    outputs: [
-      {
-        internalType: "address",
-        name: "",
-        type: "address",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "_official",
-        type: "address",
-      },
-    ],
-    name: "addAuthorizedOfficial",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "uint256",
         name: "_propertyId",
         type: "uint256",
       },
       {
-        internalType: "string",
-        name: "_propertyName",
-        type: "string",
-      },
-      {
-        internalType: "string",
-        name: "_location",
-        type: "string",
-      },
-      {
-        internalType: "uint256",
-        name: "_area",
-        type: "uint256",
-      },
-      {
         internalType: "address",
-        name: "_owner",
+        name: "_newOwner",
         type: "address",
       },
-      {
-        internalType: "uint256",
-        name: "_price",
-        type: "uint256",
-      },
-      {
-        internalType: "string",
-        name: "_imageURL",
-        type: "string",
-      },
     ],
-    name: "addProperty",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "uint256",
-        name: "_propertyId",
-        type: "uint256",
-      },
-    ],
-    name: "approveROW",
+    name: "transferOwnership",
     outputs: [],
     stateMutability: "nonpayable",
     type: "function",
@@ -390,32 +387,25 @@ export const abi = [
   {
     inputs: [
       {
-        internalType: "address",
-        name: "_official",
-        type: "address",
-      },
-    ],
-    name: "removeAuthorizedOfficial",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
         internalType: "uint256",
-        name: "_propertyId",
+        name: "",
         type: "uint256",
       },
       {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
+    name: "ROWApprovals",
+    outputs: [
+      {
         internalType: "address",
-        name: "_newOwner",
+        name: "",
         type: "address",
       },
     ],
-    name: "transferOwnership",
-    outputs: [],
-    stateMutability: "nonpayable",
+    stateMutability: "view",
     type: "function",
   },
 ];

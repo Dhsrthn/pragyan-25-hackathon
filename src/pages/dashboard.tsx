@@ -1,173 +1,237 @@
 import { useDisclosure } from "@mantine/hooks";
-import { Modal } from "@mantine/core";
-import { ethers } from "ethers";
-import { abi } from "./abi";
-import { useEffect, useState } from "react";
-import { RandomLoader } from '../components/loader/randomLoader';
-import toast from "react-hot-toast";
-import PlotInformation from "../components/information/information";
+import { Modal, NumberInput, TextInput } from "@mantine/core";
+import { useState } from "react";
+import toast, { Toaster } from "react-hot-toast";
+import { useForm } from "@mantine/form";
+import { RandomLoader } from "../components/loader/randomLoader";
 
-const array = [1, 2, 3, 4, 5, 6, 7, 8];
-const imgSrcs = ['image1.jpg', 'image2.jpg', 'image3.jpeg', 'image4.jpg']
+const initialPlots = [
+  {
+    id: 1,
+    name: "Property 1",
+    imageUrl: "/assets/images/buildings/image1.jpg",
+    location: "New York",
+    area: 1000,
+    price: 500000,
+  },
+  {
+    id: 2,
+    name: "Property 2",
+    imageUrl: "/assets/images/buildings/image2.jpg",
+    location: "Los Angeles",
+    area: 1500,
+    price: 750000,
+  },
+  {
+    id: 3,
+    name: "Property 3",
+    imageUrl: "/assets/images/buildings/image3.jpeg",
+    location: "Chicago",
+    area: 800,
+    price: 400000,
+  },
+  {
+    id: 4,
+    name: "Property 4",
+    imageUrl: "/assets/images/buildings/image4.jpg",
+    location: "Houston",
+    area: 1200,
+    price: 600000,
+  },
+];
 
 enum ModalMode {
   Information,
-  AddElement
-}
-
-const AddElementModal = () => {
-  return <></>
+  AddElement,
 }
 
 function Dashboard() {
   const [opened, { open, close }] = useDisclosure(false);
-  const [loader, setLoader] = useState(false)
+  const [loader, setLoader] = useState(false);
+  const [plots, setPlots] = useState(initialPlots);
+  const [selectedPlot, setSelectedPlot] = useState(null);
+  const [modalMode, setModalMode] = useState(ModalMode.Information);
 
-  const giveRandomNumber = (n: number): number => {
-    return Math.floor(Math.random() * n)
-  }
-  const handleConfirmation = () => {
-    setLoader(true)
-    setTimeout(() => {
-      toast.success('Request sent successfully')
-      close()
-      setLoader(false)
-    }, 3200)
-  }
+  const form = useForm({
+    initialValues: {
+      name: "",
+      imageUrl: "",
+      location: "",
+      area: 0,
+      price: 0,
+    },
+    validate: {
+      name: (value) =>
+        value.trim().length < 2 ? "Name must be at least 2 characters" : null,
+      imageUrl: (value) => (!value.startsWith("http") ? "Invalid URL" : null),
+      area: (value) => (value <= 0 ? "Area must be positive" : null),
+      price: (value) => (value < 0 ? "Price cannot be negative" : null),
+    },
+  });
 
-  const [account, setAccount] = useState("");
-  const [modalMode, setModalModal] = useState(ModalMode.Information);
-  const [contract, setContract] = useState<ethers.Contract | null>(null);
-  const [, setProvider] = useState<ethers.providers.Web3Provider | null>(null);
-  useEffect(() => {
-    console.log(ethers);
-    //@ts-ignore
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
-
-    const loadProvider = async () => {
-      if (provider) {
-        //@ts-ignore
-        window.ethereum.on("chainChanged", () => {
-          window.location.reload();
-        });
-
-        //@ts-ignore
-        window.ethereum.on("accountsChanged", () => {
-          window.location.reload();
-        });
-        await provider.send("eth_requestAccounts", []);
-        const signer = provider.getSigner();
-        const address = await signer.getAddress();
-        setAccount(address);
-        const contractAddress = "0xE838CCa1369D091f308933bE7281ed17369DAFF5";
-
-        const contract: any = new ethers.Contract(contractAddress, abi, signer);
-
-        setContract(contract);
-        setProvider(provider);
-        console.log("Metamask is installed");
-        console.log(contract, provider, account);
-      } else {
-        console.error("Metamask is not installed");
-      }
-    };
-    if (provider) loadProvider();
-  }, []);
-
-  const openInformationModal = () => {
-    setModalModal(ModalMode.Information)
-    open()
-  }
+  const openInformationModal = (plot) => {
+    setSelectedPlot(plot);
+    setModalMode(ModalMode.Information);
+    open();
+  };
 
   const openAddElementModal = () => {
-    setModalModal(ModalMode.AddElement)
-    open()
-  }
+    setSelectedPlot(null);
+    setModalMode(ModalMode.AddElement);
+    open();
+  };
 
+  const handleAddProperty = (values) => {
+    const newProperty = {
+      ...values,
+      id: plots.length + 1,
+    };
+    setPlots([...plots, newProperty]);
+    close();
+  };
 
-  return (<>
-    {loader ? (
-      <div className='w-screen h-screen bg-[#00000087] absolute flex justify-center items-center overflow-hidden'><RandomLoader /></div>
-    ) : <Modal.Root opened={opened} onClose={close}>
-      <Modal.Overlay backgroundOpacity={0.55} blur={3} />
-      <Modal.Content>
-        <Modal.Header>
-          <Modal.Title className="text-4xl font-bold text-redd">
-            {modalMode === ModalMode.Information ? "Plot Information" : "Add Element"}
-          </Modal.Title>
-          <Modal.CloseButton />
-        </Modal.Header>
-        <Modal.Body>
-          {/* <div className="h-full w-full flex flex-col justify-between">
-            <div className="text-2xl h-[80%] text-center">
-              COST: ₹100000
-            </div>
-            <div className="w-full h-14 flex flex-row justify-evenly p-2 text-xl mt-1">
-              <div className="w-2/5 h-full bg-black">
+  const handleBuyPlot = () => {
+    setLoader(true);
+    close();
+    setTimeout(() => {
+      toast.success("Request sent successfully");
+      setLoader(false);
+      close();
+    }, 3200);
+  };
+
+  return (
+    <>
+      {loader && (
+        <div className="w-screen h-screen bg-[#00000087] absolute flex justify-center items-center z-50">
+          <RandomLoader />
+        </div>
+      )}
+
+      <Modal.Root opened={opened} onClose={close}>
+        <Modal.Overlay backgroundOpacity={0.55} blur={3} />
+        <Modal.Content>
+          <Modal.Header>
+            <Modal.Title className="text-4xl font-bold text-redd">
+              {modalMode === ModalMode.Information
+                ? "Plot Information"
+                : "Add Element"}
+            </Modal.Title>
+            <Modal.CloseButton />
+          </Modal.Header>
+          <Modal.Body>
+            {modalMode === ModalMode.Information && selectedPlot && (
+              <div>
+                <h2>{selectedPlot.name}</h2>
+                <img
+                  src={selectedPlot.imageUrl}
+                  alt={selectedPlot.name}
+                  className="w-full h-64 object-cover mb-4"
+                />
+                <p>
+                  <strong>Location:</strong> {selectedPlot.location}
+                </p>
+                <p>
+                  <strong>Area:</strong> {selectedPlot.area} sq ft
+                </p>
+                <p>
+                  <strong>Price:</strong> ${selectedPlot.price.toLocaleString()}
+                </p>
                 <button
-                  className="w-full h-full text-white hover:underline transition-all hover:tracking-wider bg-[#007a00] px-10 py-1  hover:bg-white hover:text-black hover:border-2 hover:border-[#007a00] hover:cursor-pointer -translate-x-1 -translate-y-1"
-                  onClick={handleConfirmation}
+                  onClick={handleBuyPlot}
+                  className="mt-4 bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
                 >
-                  Confirm
+                  Buy Plot
                 </button>
               </div>
-              <div className="w-2/5 h-full bg-black">
+            )}
+            {modalMode === ModalMode.AddElement && (
+              <form onSubmit={form.onSubmit(handleAddProperty)}>
+                <TextInput
+                  label="Name"
+                  placeholder="Enter property name"
+                  {...form.getInputProps("name")}
+                  withAsterisk
+                />
+                <TextInput
+                  label="Image URL"
+                  placeholder="https://example.com/image.jpg"
+                  {...form.getInputProps("imageUrl")}
+                  mt="md"
+                />
+                <TextInput
+                  label="Location"
+                  placeholder="Enter location"
+                  {...form.getInputProps("location")}
+                  mt="md"
+                />
+                <NumberInput
+                  label="Area"
+                  placeholder="Enter area"
+                  {...form.getInputProps("area")}
+                  mt="md"
+                  suffix=" sq ft"
+                />
+                <NumberInput
+                  label="Price"
+                  placeholder="Enter price"
+                  {...form.getInputProps("price")}
+                  mt="md"
+                  prefix="$"
+                />
                 <button
-                  className="w-full h-full bg-red-900 text-white hover:underline transition-all hover:tracking-wider px-10 py-1 hover:bg-white hover:border hover:border-black hover:text-black hover:cursor-pointer -translate-x-1 -translate-y-1"
-                  onClick={close}
+                  type="submit"
+                  className="mt-4 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
                 >
-                  Close
+                  Add Property
                 </button>
-              </div>
-            </div>
-          </div> */}
-          {modalMode === ModalMode.Information && <><PlotInformation /></>}
-          {modalMode === ModalMode.AddElement && <><AddElementModal /> </>}
-        </Modal.Body>
-      </Modal.Content>
-    </Modal.Root>}
+              </form>
+            )}
+          </Modal.Body>
+        </Modal.Content>
+      </Modal.Root>
 
-    <div className='h-screen w-screen overflow-hidden'>
-      <div className="h-[10%]"></div>
-      <div className='h-[90%] w-full px-56 overflow-auto pt-4'>
-
-        {/* <div>
-                <Button onClick={open} color='violet'>Open centered Modal</Button>
-            </div> */}
-
-        {/* List of properties */}
-        <div className="w-full h-[80%] flex flex-wrap justify-center gap-8 items-start p-2">
-          {array.map((item, index) => {
-            return (
-              <>
-                <div className="w-56 h-60 bg-black">
-                  <div className={`w-full h-60 bg-white flex flex-col justify-around items-center ${!loader && "-translate-x-1 -translate-y-1"}  border `} >
-                    {/* Property Name */}
-                    <span className="font-bold text-2xl h-12 py-2">Property {item}</span>
-                    <img src={`/assets/images/buildings/${imgSrcs[index % 4]}`} alt="" className='h-32 object-contain' />
-                    {/* Buttons */}
-                    <div className='h-12 py-2'>
-                      <div className="bg-black">
-                        <button
-                          className={`px-10 py-1 hover:-translate-x-2 ${!loader && "-translate-x-1 -translate-y-1"}  hover:-translate-y-2 transition-all hover:border-2 bg-[#007a00] text-white hover:text-[#007a00] hover:bg-white hover:border-[#007a00] font-semibold hover:cursor-pointer`}
-                          onClick={openInformationModal}
-                        >
-                          Buy
-                        </button>
-                      </div>
+      <div className="h-screen w-screen overflow-hidden">
+        <div className="h-[10%]"></div>
+        <div className="h-[90%] w-full px-56 overflow-auto pt-4">
+          <div className="w-full h-[80%] flex flex-wrap justify-center gap-8 items-start p-2">
+            {plots.map((plot) => (
+              <div key={plot.id} className="w-56 h-60 bg-black">
+                <div className="w-full h-60 bg-white flex flex-col justify-around items-center border">
+                  <span className="font-bold text-2xl h-12 py-2">
+                    {plot.name}
+                  </span>
+                  <img
+                    src={plot.imageUrl}
+                    alt={plot.name}
+                    className="h-32 object-contain"
+                  />
+                  <div className="h-12 py-2">
+                    <div className="bg-black">
+                      <button
+                        className="px-10 py-1 hover:-translate-x-2 -translate-x-1 -translate-y-1 hover:-translate-y-2 transition-all hover:border-2 bg-[#007a00] text-white hover:text-[#007a00] hover:bg-white hover:border-[#007a00] font-semibold hover:cursor-pointer"
+                        onClick={() => openInformationModal(plot)}
+                      >
+                        Buy
+                      </button>
                     </div>
                   </div>
                 </div>
-              </>
-            )
-          })}
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="fixed right-10 bottom-10 text-[#007a00]">
+          <img
+            src="./assets/plus.svg"
+            alt=""
+            className="size-20 hover:cursor-pointer"
+            onClick={openAddElementModal}
+          />
         </div>
       </div>
-      <div className="fixed right-10 bottom-10 text-[#007a00]">
-        <img src="./assets/plus.svg" alt="" className="size-20 hover:cursor-pointer" onClick={openAddElementModal} />
-      </div>
-    </div >
-  </>)
+    </>
+  );
 }
 
 export default Dashboard;

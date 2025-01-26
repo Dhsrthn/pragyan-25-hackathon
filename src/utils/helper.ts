@@ -2,22 +2,18 @@ import { Contract, ethers } from "ethers";
 
 // **Create Property**
 export const addProperty = async (
-  propertyId: number,
   propertyName: string,
   location: string,
   area: number,
-  owner: string,
   price: number,
   imageURL: string,
   contract: Contract
 ) => {
   try {
     const tx = await contract.addProperty(
-      propertyId,
       propertyName,
       location,
       area,
-      owner,
       price,
       imageURL
     );
