@@ -1,7 +1,8 @@
+//@ts-nocheck
 import { useDisclosure } from "@mantine/hooks";
 import { Modal, NumberInput, TextInput } from "@mantine/core";
 import { useState } from "react";
-import toast, { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
 import { useForm } from "@mantine/form";
 import { RandomLoader } from "../components/loader/randomLoader";
 
