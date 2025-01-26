@@ -1,57 +1,94 @@
 //@ts-nocheck
 import { useDisclosure } from "@mantine/hooks";
 import { Modal, NumberInput, TextInput } from "@mantine/core";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { useForm } from "@mantine/form";
 import { RandomLoader } from "../components/loader/randomLoader";
-
-const initialPlots = [
-  {
-    id: 1,
-    name: "Property 1",
-    imageUrl: "/assets/images/buildings/image1.jpg",
-    location: "New York",
-    area: 1000,
-    price: 500000,
-  },
-  {
-    id: 2,
-    name: "Property 2",
-    imageUrl: "/assets/images/buildings/image2.jpg",
-    location: "Los Angeles",
-    area: 1500,
-    price: 750000,
-  },
-  {
-    id: 3,
-    name: "Property 3",
-    imageUrl: "/assets/images/buildings/image3.jpeg",
-    location: "Chicago",
-    area: 800,
-    price: 400000,
-  },
-  {
-    id: 4,
-    name: "Property 4",
-    imageUrl: "/assets/images/buildings/image4.jpg",
-    location: "Houston",
-    area: 1200,
-    price: 600000,
-  },
-];
+import { addProperty, getAllProperties } from "../utils/helper";
+import { ethers } from "ethers";
+import { abi } from "./abi";
 
 enum ModalMode {
   Information,
   AddElement,
 }
+interface Plot {
+  id: number;
+  name: string;
+  imageUrl: string;
+  location: string;
+  area: number;
+  price: number;
+  owner?: string;
+  isROWApproved?: boolean;
+}
 
 function Dashboard() {
   const [opened, { open, close }] = useDisclosure(false);
   const [loader, setLoader] = useState(false);
-  const [plots, setPlots] = useState(initialPlots);
-  const [selectedPlot, setSelectedPlot] = useState(null);
+  const [plots, setPlots] = useState<Plot[]>([]);
+  const [selectedPlot, setSelectedPlot] = useState<Plot | null>(null);
   const [modalMode, setModalMode] = useState(ModalMode.Information);
+
+  const [account, setAccount] = useState("");
+  const [contract, setContract] = useState<ethers.Contract | null>(null);
+  const [, setProvider] = useState<ethers.providers.Web3Provider | null>(null);
+
+  useEffect(() => {
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+
+    const loadProvider = async () => {
+      if (provider) {
+        window.ethereum.on("chainChanged", () => {
+          window.location.reload();
+        });
+
+        window.ethereum.on("accountsChanged", () => {
+          window.location.reload();
+        });
+        await provider.send("eth_requestAccounts", []);
+        const signer = provider.getSigner();
+        const address = await signer.getAddress();
+        setAccount(address);
+        const contractAddress = "0x9FAE5cC2957985C3361E29f2426F3242E27F603b";
+
+        const contract: any = new ethers.Contract(contractAddress, abi, signer);
+
+        setContract(contract);
+        setProvider(provider);
+      } else {
+        console.error("Metamask is not installed");
+      }
+    };
+    if (provider) loadProvider();
+  }, []);
+
+  useEffect(() => {
+    if (!contract) return;
+
+    const fetchProperties = async () => {
+      try {
+        const properties = await getAllProperties(contract);
+        const formattedPlots: Plot[] = properties.map((prop, index) => ({
+          id: index + 1,
+          name: prop.propertyName,
+          imageUrl: prop[7], // imageURL from the array
+          location: prop.location,
+          area: prop.area.toNumber(),
+          price: prop.price.toNumber(),
+          owner: prop.owner,
+          isROWApproved: prop.isROWApproved,
+        }));
+        setPlots(formattedPlots);
+      } catch (error) {
+        console.error("Error fetching properties:", error);
+        toast.error("Failed to fetch properties");
+      }
+    };
+
+    fetchProperties();
+  }, [contract]);
 
   const form = useForm({
     initialValues: {
@@ -82,23 +119,57 @@ function Dashboard() {
     open();
   };
 
-  const handleAddProperty = (values) => {
-    const newProperty = {
-      ...values,
-      id: plots.length + 1,
-    };
-    setPlots([...plots, newProperty]);
-    close();
+  const handleAddProperty = async (values) => {
+    if (!contract) {
+      toast.error("Blockchain contract not initialized");
+      return;
+    }
+
+    try {
+      setLoader(true);
+      const tx = await addProperty(
+        values.name,
+        values.location,
+        values.area,
+        values.price,
+        values.imageUrl,
+        contract
+      );
+      // await tx.wait();
+
+      toast.success("Property added successfully");
+      close();
+    } catch (error) {
+      console.error("Error adding property:", error);
+      toast.error("Failed to add property");
+    } finally {
+      setLoader(false);
+    }
   };
 
-  const handleBuyPlot = () => {
-    setLoader(true);
-    close();
-    setTimeout(() => {
-      toast.success("Request sent successfully");
-      setLoader(false);
+  const handleBuyPlot = async () => {
+    if (!contract || !selectedPlot) {
+      toast.error("Cannot process transaction");
+      return;
+    }
+
+    try {
+      setLoader(true);
+      // Implement contract method to buy property
+      // This is a placeholder - you'll need to replace with actual contract method
+      // const tx = await contract.buyProperty(selectedPlot.id);
+      // await tx.wait();
+
       close();
-    }, 3200);
+    } catch (error) {
+      console.error("Error buying property:", error);
+      toast.error("Failed to buy property");
+    } finally {
+      setTimeout(() => {
+        toast.success("Property purchase request sent");
+        setLoader(false);
+      }, 3200);
+    }
   };
 
   return (
@@ -191,7 +262,6 @@ function Dashboard() {
           </Modal.Body>
         </Modal.Content>
       </Modal.Root>
-
       <div className="h-screen w-screen overflow-hidden">
         <div className="h-[10%]"></div>
         <div className="h-[90%] w-full px-56 overflow-auto pt-4">
