@@ -6,7 +6,6 @@ from shapely.prepared import prep
 from tqdm import tqdm
 
 def parse_coordinates(coordinates):
-    """Recursively parse coordinates to handle nested structures."""
     def _deep_flatten(item):
         if isinstance(item, (int, float)):
             return item
@@ -23,25 +22,20 @@ def parse_coordinates(coordinates):
         
         return flattened
 
-    # Flatten coordinates
     flat_coords = _deep_flatten(coordinates)
     
-    # Convert to coordinate pairs
     try:
         return [(flat_coords[i], flat_coords[i+1]) for i in range(0, len(flat_coords), 2)]
     except Exception:
         return []
 
 def create_robust_polygon(coordinates):
-    """Create polygon with MultiPolygon support."""
     try:
         coords = parse_coordinates(coordinates)
         
-        # Check for valid polygon
         if len(set(coords)) < 3:
             return None
         
-        # Handle MultiPolygon potential
         if isinstance(coordinates[0], list) and isinstance(coordinates[0][0], list):
             polygons = []
             for poly_coords in coordinates:
@@ -57,11 +51,9 @@ def create_robust_polygon(coordinates):
         return None
 
 def find_detailed_neighbors(features: List[dict]) -> Dict[str, List[str]]:
-    """Comprehensive neighbor detection with robust intersection checks."""
     neighbors = {}
     prepared_geometries = []
     
-    # Preprocess and prepare geometries
     for feature in tqdm(features, desc="Preprocessing Geometries"):
         geo_id = feature['properties']['GEO_ID']
         geometry = create_robust_polygon(feature['geometry']['coordinates'])
@@ -72,15 +64,13 @@ def find_detailed_neighbors(features: List[dict]) -> Dict[str, List[str]]:
                 'prepared_geom': prep(geometry)
             })
     
-    # Neighbor detection
     for i, feature1 in tqdm(enumerate(prepared_geometries), desc="Finding Neighbors"):
         neighbors[feature1['geo_id']] = []
         
         for j, feature2 in enumerate(prepared_geometries):
             if i == j:
                 continue
-            
-            # Use prepared geometry for faster intersection
+
             try:
                 if feature1['prepared_geom'].intersects(feature2['prepared_geom'].context):
                     neighbors[feature1['geo_id']].append(feature2['geo_id'])
@@ -90,20 +80,15 @@ def find_detailed_neighbors(features: List[dict]) -> Dict[str, List[str]]:
     return neighbors
 
 def create_county_graph(geojson_path: str) -> nx.Graph:
-    """Create a graph of counties with centroids and neighbors."""
-    # Load GeoJSON
     with open(geojson_path, 'r') as f:
         data = json.load(f)
     
-    # Create graph
     G = nx.Graph()
     
-    # Add nodes with centroids
     for feature in tqdm(data['features'], desc="Adding Nodes"):
         geo_id = feature['properties']['GEO_ID']
         county_name = feature['properties']['COUNTY']
         
-        # Create polygon and calculate centroid
         poly = create_robust_polygon(feature['geometry']['coordinates'])
         if not poly:
             continue
@@ -114,8 +99,7 @@ def create_county_graph(geojson_path: str) -> nx.Graph:
                    name=county_name, 
                    centroid_x=centroid.x, 
                    centroid_y=centroid.y)
-    
-    # Find and add edges between neighboring counties
+
     neighbors = find_detailed_neighbors(data['features'])
     
     for county, county_neighbors in tqdm(neighbors.items(), desc="Adding Edges"):
@@ -125,7 +109,6 @@ def create_county_graph(geojson_path: str) -> nx.Graph:
     return G
 
 def export_graph_to_json(G: nx.Graph, output_path: str):
-    """Export graph to JSON with detailed information."""
     graph_data = {
         'nodes': [
             {
@@ -145,7 +128,6 @@ def export_graph_to_json(G: nx.Graph, output_path: str):
     
     print(f"Graph exported with {len(graph_data['nodes'])} nodes and {len(graph_data['edges'])} edges")
 
-# Example usage
 def main(input_geojson, output_graph_json):
     print("Creating county graph...")
     G = create_county_graph(input_geojson)
@@ -153,6 +135,5 @@ def main(input_geojson, output_graph_json):
     export_graph_to_json(G, output_graph_json)
     print(f"Graph exported to {output_graph_json}")
 
-# Uncomment and use when running
 if __name__ == '__main__':
     main('input.json', 'county_graph.json')

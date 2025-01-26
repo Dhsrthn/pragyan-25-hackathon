@@ -2,7 +2,6 @@
  
 import { Contract, ethers } from "ethers";
 
-// **Create Property**
 export const addProperty = async (
   propertyId: number,
   propertyName: string,
@@ -30,7 +29,6 @@ export const addProperty = async (
   }
 };
 
-// **Read Property**
 export const getProperty = async (propertyId: number, contract: Contract) => {
   try {
     const property = await contract.getProperty(propertyId);
@@ -41,7 +39,6 @@ export const getProperty = async (propertyId: number, contract: Contract) => {
   }
 };
 
-// **Read All Properties**
 export const getAllProperties = async (contract: Contract) => {
   try {
     const properties = await contract.getAllProperties();
@@ -52,7 +49,6 @@ export const getAllProperties = async (contract: Contract) => {
   }
 };
 
-// **Update (Transfer Ownership)**
 export const transferOwnership = async (
   propertyId: number,
   newOwner: string,
@@ -67,7 +63,6 @@ export const transferOwnership = async (
   }
 };
 
-// **Approve ROW (Right of Way)**
 export const approveROW = async (propertyId: number, contract: Contract) => {
   try {
     const tx = await contract.approveROW(propertyId);
@@ -78,7 +73,6 @@ export const approveROW = async (propertyId: number, contract: Contract) => {
   }
 };
 
-// **Get ROW Approvals**
 export const getROWApprovals = async (
   propertyId: number,
   contract: Contract
@@ -92,7 +86,6 @@ export const getROWApprovals = async (
   }
 };
 
-// **Add Authorized Official**
 export const addAuthorizedOfficial = async (
   official: string,
   contract: Contract
@@ -106,7 +99,6 @@ export const addAuthorizedOfficial = async (
   }
 };
 
-// **Remove Authorized Official**
 export const removeAuthorizedOfficial = async (
   official: string,
   contract: Contract
